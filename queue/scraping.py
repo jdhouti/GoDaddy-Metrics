@@ -25,7 +25,7 @@ while datetime.datetime.time(datetime.datetime.now()) < time_limit:
 
     # Let's write to the file
     temporary_string = (str(name_box[0]) + ',' + str(name_box[1]) + ',' +
-						str(name_box[2]) + ',' + str(datetime.datetime.now()))
+                        str(name_box[2]) + ',' + str(datetime.datetime.now()))
     file.write(temporary_string + '\n')
     print('written: ' + temporary_string)
     file.close()
