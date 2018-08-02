@@ -1,4 +1,4 @@
-# GoDaddy-Metrics
+# Metrique
 As a consultant at GoDaddy, we are constantly tracked on a dozen of metrics, including our customer availability (our percentage of availability on the phone), our sales (new revenue and renewed revenue), our survey scores etc. Although they allow us to obtain this data so that we can track our performance, we are not provided with any analytical tools so the data is rendered meaningless for us agents. We have no way of visualizing our performance.
 
 A few months ago, I started recording this data on a spreadsheet that I would take home and look over. Even though I wasn't provided with any graph tools, I saw no reason to not make any myself, so I got to work with jupyter notebooks. 
