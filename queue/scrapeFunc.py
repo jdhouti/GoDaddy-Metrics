@@ -12,5 +12,5 @@ def scrape():
 	# Get the values from the html tab
 	name_box = [my_tag.text for my_tag in soup.find_all('td', attrs={'class': 'statWhite'})]
 
-	return (name_box[0])
+	return (name_box[0], name_box[2])
 	
