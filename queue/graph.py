@@ -54,7 +54,7 @@ for i in df.columns[:-1]:
 # Edit the layout
 layout = go.Layout(
 	annotations=annotations,
-	title='Queue Report for ' + str(datetime.datetime.now().date()),
+	title='General Queue Report for ' + str(datetime.datetime.now().date()),
 	xaxis=dict(
 		title='TIME',
 		zeroline=True,
