@@ -5,7 +5,7 @@ import datetime
 
 data_filename = 'queue_data_' + str(datetime.datetime.now().date()) + '.csv'
 url = "http://reporting.int.godaddy.com/wallboard/ccqueues-international.aspx?UTCOffset=1&Skilltargets=5007|10176"
-time_limit = datetime.time(13, 30, 0, 0)
+time_limit = datetime.time(17, 30, 0, 0)
 refresh_rate = 15 #seconds
 
 print('info : current time is ' + str(datetime.datetime.now()))
