@@ -1,0 +1,21 @@
+.app-header {
+    line-height: 60px;
+	font-size: 50px;
+	background-color: rgb(61,61,61);
+}
+
+.app-header--title {
+	padding: 10px;
+	color: rgb(255, 255, 255);
+    font-size: 50px;
+	text-align: center;
+}
+
+.app-metrics {
+	float: right;
+	background-color: rgb(61,61,61);
+}
+
+.modebar{
+      display: none !important;
+}
