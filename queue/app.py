@@ -10,26 +10,48 @@ from scrapeFunc import scrape
 import datetime
 from plotly import tools
 
-Y1 = deque(maxlen=3600)
-Y2 = deque(maxlen=3600)
+Y1 = deque(maxlen=900)
+Y2 = deque(maxlen=900)
 Y1.append(scrape()[0])
 Y2.append(scrape()[1])
-X = deque(maxlen=3600)
+X = deque(maxlen=900)
 X.append(datetime.datetime.now())
 
 app = dash.Dash(__name__)
-app.layout = html.Div(
-    [
+app.layout = html.Div([
+		html.Div(
+			className='app-header',
+			children=[
+				html.Div('GoDaddy Live Queue', className='app-header--title')
+			]
+		),
+		html.Div(
+			className='app-metrics',
+			children=[
+				html.Div(id='live-update-text', className='app-metrics--live')
+			]
+		),
         dcc.Graph(id='live-graph'),
         dcc.Interval(
-            id='graph-update',
+            id='interval-component',
             interval=1*4000
         ),
     ]
 )
 
+@app.callback(Output('live-update-text', 'children'),
+              events=[Event('interval-component', 'interval')])
+def update_metrics():
+	Y1.append(scrape()[0])
+	Y2.append(scrape()[1])
+	X.append(datetime.datetime.now())
+	
+	return [
+		html.Span('Test: {}'.format(Y1[-1]))
+	]
+
 @app.callback(Output('live-graph', 'figure'),
-              events=[Event('graph-update', 'interval')])
+              events=[Event('interval-component', 'interval')])
 def update_graph_scatter():
 	Y1.append(scrape()[0])
 	Y2.append(scrape()[1])
@@ -40,6 +62,7 @@ def update_graph_scatter():
 			y=list(Y1),
 			name='Inbound Queue',
 			mode= 'lines',
+			fill='tozeroy',
 			line = dict(color='rgb(0, 255, 242)')
 	)
 	data2 = plotly.graph_objs.Scatter(
@@ -47,6 +70,7 @@ def update_graph_scatter():
 			y=list(Y2),
 			name='French Queue',
 			mode= 'lines',
+			fill='tozeroy',
 			yaxis='y2',
 			line = dict(color='rgb(255, 94, 225)')
 	)
@@ -102,9 +126,9 @@ def update_graph_scatter():
 		paper_bgcolor='rgb(61, 61, 61)',
 		plot_bgcolor='rgb(61, 61, 61)',
 		margin=go.Margin(
-			t=50
+			t=20
 		),
-		height=900,
+		height=850,
 		showlegend=False,
 		xaxis=dict(
 			tickcolor='black',
@@ -154,7 +178,7 @@ def update_graph_scatter():
 				color='rgb(255, 94, 225)',
 				size=20
 			),
-			range=[0, 10],
+			range=[0, 15],
 			linecolor='black',
 			linewidth=2,
 			mirror='ticks',
