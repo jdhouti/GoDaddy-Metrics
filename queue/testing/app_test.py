@@ -1,158 +1,90 @@
+import datetime
+
 import dash
-from dash.dependencies import Output, Event
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly
-import random
-import plotly.graph_objs as go
-from collections import deque
-from scrapeFunc_test import scrape
-import datetime
-from plotly import tools
-
-Y1 = deque(maxlen=3600)
-Y2 = deque(maxlen=3600)
-Y1.append(scrape()[0])
-Y2.append(scrape()[1])
-X = deque(maxlen=3600)
-X.append(datetime.datetime.now())
+from dash.dependencies import Input, Output
+    
+# pip install pyorbital
+from pyorbital.orbital import Orbital
+satellite = Orbital('TERRA')
 
 app = dash.Dash(__name__)
 app.layout = html.Div(
-    [
-        dcc.Graph(id='live-graph'),
+    html.Div([
+        html.H4('TERRA Satellite Live Feed'),
+        html.Div(id='live-update-text'),
+        dcc.Graph(id='live-update-graph'),
         dcc.Interval(
-            id='graph-update',
-            interval=1*1000
-        ),
-    ]
+            id='interval-component',
+            interval=1*1000, # in milliseconds
+            n_intervals=0
+        )
+    ])
 )
 
-@app.callback(Output('live-graph', 'figure'),
-              events=[Event('graph-update', 'interval')])
-def update_graph_scatter():
-	Y1.append(scrape()[0])
-	Y2.append(scrape()[1])
-	X.append(datetime.datetime.now())
 
-	data1 = plotly.graph_objs.Scatter(
-			x=list(X),
-			y=list(Y1),
-			name='Inbound Queue',
-			mode= 'lines',
-			line = dict(color='rgb(0, 255, 242)')
-	)
-	data2 = plotly.graph_objs.Scatter(
-			x=list(X),
-			y=list(Y2),
-			name='French Queue',
-			mode= 'lines',
-			yaxis='y2',
-			line = dict(color='rgb(255, 94, 225)')
-	)
-	
-	annotations=[
-        dict(
-            x=list(X)[-1],
-            y=list(Y1)[-1],
-            xref='x',
-            yref='y',
-            text=str(list(Y1)[-1]),
-            showarrow=False,
-			font=dict(
-				size=20,
-				family='Monaco, monospace',
-                color='rgb(0, 255, 242)'
-            ),
-            ax=30,
-            ay=-10
-        ),
-        dict(
-            x=list(X)[-1],
-            y=list(Y2)[-1],
-            xref='x',
-            yref='y2',
-            text=str(list(Y2)[-1]),
-            showarrow=False,
-			font=dict(
-				size=20,
-				family='Monaco, monospace',
-                color='rgb(255, 94, 225)'
-            ),
-            ax=30,
-            ay=-10
-        )
+@app.callback(Output('live-update-text', 'children'),
+              [Input('interval-component', 'n_intervals')])
+def update_metrics(n):
+    lon, lat, alt = satellite.get_lonlatalt(datetime.datetime.now())
+    style = {'padding': '5px', 'fontSize': '16px'}
+    return [
+        html.Span('Longitude: {0:.2f}'.format(lon), style=style),
+        html.Span('Latitude: {0:.2f}'.format(lat), style=style),
+        html.Span('Altitude: {0:0.2f}'.format(alt), style=style)
     ]
-	
-	fig = tools.make_subplots(
-		rows=2,
-		cols=1,
-		vertical_spacing=0.07,
-		subplot_titles=(
-			'INBOUND QUEUE: ' + str(scrape()[0]),
-			'FRENCH QUEUE: ' + str(scrape()[1])
-		)
-	)
-	
-	fig.append_trace(data1, 1, 1)
-	fig.append_trace(data2, 2, 1)
-	
-	fig['layout'].update(
-		annotations=annotations,
-		paper_bgcolor='rgb(61, 61, 61)',
-		plot_bgcolor='rgb(61, 61, 61)',
-		margin=go.Margin(
-			t=50
-		),
-		height=900,
-		showlegend=False,
-		xaxis=dict(
-			tickcolor='black',
-			gridcolor='rgb(112, 112, 112)',
-			range=[min(X), max(X)],
-			linecolor='black',
-			linewidth=2,
-			tickwidth=2,
-			showticklabels=False
-		),
-		xaxis2=dict(
-			color='lightgrey',
-			tickcolor='black',
-			gridcolor='rgb(112, 112, 112)',
-			ticks='outside',
-			title='TIME: ' + str(datetime.datetime.now().time()),
-			range=[min(X), max(X)],
-			linecolor='black',
-			linewidth=2,
-			tickwidth=2
-		),
-		yaxis=dict(
-			color='rgb(0, 226, 215)',
-			tickcolor='black',
-			gridcolor='rgb(112, 112, 112)',
-			ticks='outside',
-			title='ENGLISH    CUSTOMERS',
-			range=[0, 350],
-			linecolor='black',
-			linewidth=2,
-			mirror='ticks',
-			tickwidth=2
-		),
-		yaxis2=dict(
-			color='rgb(255, 94, 225)',
-			tickcolor='black',
-			gridcolor='rgb(112, 112, 112)',
-			ticks='outside',
-			title='FRENCH    CUSTOMERS',
-			range=[0, 10],
-			linecolor='black',
-			linewidth=2,
-			mirror='ticks',
-			tickwidth=2
-		)
-	)
-	
-	return(fig)
+
+
+# Multiple components can update everytime interval gets fired.
+@app.callback(Output('live-update-graph', 'figure'),
+              [Input('interval-component', 'n_intervals')])
+def update_graph_live(n):
+    satellite = Orbital('TERRA')
+    data = {
+        'time': [],
+        'Latitude': [],
+        'Longitude': [],
+        'Altitude': []
+    }
+
+    # Collect some data
+    for i in range(180):
+        time = datetime.datetime.now() - datetime.timedelta(seconds=i*20)
+        lon, lat, alt = satellite.get_lonlatalt(
+            time
+        )
+        data['Longitude'].append(lon)
+        data['Latitude'].append(lat)
+        data['Altitude'].append(alt)
+        data['time'].append(time)
+
+    # Create the graph with subplots
+    fig = plotly.tools.make_subplots(rows=2, cols=1, vertical_spacing=0.2)
+    fig['layout']['margin'] = {
+        'l': 30, 'r': 10, 'b': 30, 't': 10
+    }
+    fig['layout']['legend'] = {'x': 0, 'y': 1, 'xanchor': 'left'}
+
+    fig.append_trace({
+        'x': data['time'],
+        'y': data['Altitude'],
+        'name': 'Altitude',
+        'mode': 'lines+markers',
+        'type': 'scatter'
+    }, 1, 1)
+    fig.append_trace({
+        'x': data['Longitude'],
+        'y': data['Latitude'],
+        'text': data['time'],
+        'name': 'Longitude vs Latitude',
+        'mode': 'lines+markers',
+        'type': 'scatter'
+    }, 2, 1)
+
+    return fig
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
