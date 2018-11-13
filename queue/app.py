@@ -10,11 +10,11 @@ from scrapeFunc import scrape
 import datetime
 from plotly import tools
 
-Y1 = deque(maxlen=900)
-Y2 = deque(maxlen=900)
+Y1 = deque(maxlen=1800)
+Y2 = deque(maxlen=1800)
 Y1.append(scrape()[0])
 Y2.append(scrape()[1])
-X = deque(maxlen=900)
+X = deque(maxlen=1800)
 X.append(datetime.datetime.now())
 
 app = dash.Dash(__name__)
@@ -58,26 +58,46 @@ def update_graph_scatter():
 	X.append(datetime.datetime.now())
 
 	data1 = plotly.graph_objs.Scatter(
-			x=list(X),
-			y=list(Y1),
-			name='Inbound Queue',
-			mode= 'lines',
-			fill='tozeroy',
-			line = dict(color='rgb(0, 255, 242)')
+		x=list(X),
+		y=list(Y1),
+		name='Inbound Queue',
+		mode= 'lines',
+		fill='tozeroy',
+		line = dict(color='rgb(0, 255, 242)')
 	)
 	data2 = plotly.graph_objs.Scatter(
-			x=list(X),
-			y=list(Y2),
-			name='French Queue',
-			mode= 'lines',
-			fill='tozeroy',
-			yaxis='y2',
-			line = dict(color='rgb(255, 94, 225)')
+		x=list(X),
+		y=list(Y2),
+		name='French Queue',
+		mode= 'lines',
+		fill='tozeroy',
+		yaxis='y2',
+		line = dict(color='rgb(255, 94, 225)')
+	)
+	line1 = plotly.graph_objs.Scatter(
+		x=[list(X)[0], list(X)[-1]],
+		y=[list(Y1)[0], list(Y1)[-1]],
+		name = "Inbound 1H Diff",
+		line = dict(
+			color = 'rgb(57, 255, 20)',
+			width = 4,
+			dash = 'dot'
+		)
+	)
+	line2 = plotly.graph_objs.Scatter(
+		x=[list(X)[0], list(X)[-1]],
+		y=[list(Y2)[0], list(Y2)[-1]],
+		name = "French 1H Diff",
+		line = dict(
+			color = '#ffff00',
+			width = 4,
+			dash = 'dot'
+		)
 	)
 	
 	annotations=[
         dict(
-            x=list(X)[-1],
+			x=list(X)[-1],
             y=list(Y1)[-1],
             xref='x',
             yref='y',
@@ -119,7 +139,9 @@ def update_graph_scatter():
 	)
 	
 	fig.append_trace(data1, 1, 1)
+	fig.append_trace(line1, 1, 1)
 	fig.append_trace(data2, 2, 1)
+	fig.append_trace(line2, 2, 1)
 	
 	fig['layout'].update(
 		annotations=annotations,
