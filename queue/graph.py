@@ -18,8 +18,9 @@ except:
 	input()
 	sys.exit()
 
-df_colors = ['hsl('+str(h)+',50%'+',50%)' for h in np.linspace(0, 360, df.columns.size)]
-data, annotations = [], []
+# df_colors = ['hsl('+str(h)+',50%'+',50%)' for h in np.linspace(0, 360, df.columns.size)]
+df_colors = ['rgb(0, 255, 242)', 'rgb(57, 255, 20)', 'rgb(255, 94, 225)']
+data = []
 
 # Create traces
 for i in df.columns[:-1]:
@@ -35,34 +36,43 @@ for i in df.columns[:-1]:
 		)
 	)
 
-for i in df.columns[:-1]:
-	max_index = df[i].idxmax
-	annotations.append(
-		dict(
-			x=df['time'][max_index],
-			y=df[i][max_index],
-			xref='x',
-			yref='y',
-			text='peak: ' + str(df[i][max_index]),
-			showarrow=True,
-			arrowhead=1,
-			ax=0,
-			ay=-40
-		)
-	)
-
 # Edit the layout
 layout = go.Layout(
-	annotations=annotations,
 	title='General Queue Report for ' + str(datetime.datetime.now().date()),
+        paper_bgcolor='rgb(61, 61, 61)',
+        plot_bgcolor='rgb(61, 61, 61)',
+        titlefont=dict(
+            family='Lucida Sans Unicode", "Lucida Grande", sans-serif',
+            color='lightgrey'
+        ),
+        legend=dict(
+                font=dict(
+                        family='Lucida Sans Unicode", "Lucida Grande", sans-serif',
+                        color='lightgrey'
+                ),
+        ),
 	xaxis=dict(
 		title='TIME',
 		zeroline=True,
+                linecolor='black',
+                gridcolor='rgb(112, 112, 112)',
+                linewidth=2,
+                tickwidth=2,
+                ticks='outside',
+                tickcolor='black',
+                color='lightgrey'
 	),
 	yaxis=dict(
 		showline=True,
 		zeroline=True,
-		title='NUMBER OF PEOPLE',
+		title='PEOPLE',
+                linecolor='black',
+                gridcolor='rgb(112, 112, 112)',
+                linewidth=2,
+                tickwidth=2,
+                ticks='outside',
+                tickcolor='black',
+                color='lightgrey'
 	)
 )
 
