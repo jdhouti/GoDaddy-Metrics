@@ -10,11 +10,11 @@ from scrapeFunc import scrape
 import datetime
 from plotly import tools
 
-Y1 = deque(maxlen=900)
-Y2 = deque(maxlen=900)
+Y1 = deque(maxlen=1800)
+Y2 = deque(maxlen=1800)
 Y1.append(scrape()[0])
 Y2.append(scrape()[1])
-X = deque(maxlen=900)
+X = deque(maxlen=1800)
 X.append(datetime.datetime.now())
 
 y_axis = [Y1, Y2]
@@ -94,57 +94,100 @@ def update_graph_scatter():
 	Y1.append(scrape()[0])
 	Y2.append(scrape()[1])
 	X.append(datetime.datetime.now())
+	
+	if (int(list(Y1)[0]) == 0):
+		diff = "-.--%"
+	else:
+		diff = str(round(((int(list(Y1)[-1]) - int(list(Y1)[0])) / int(list(Y1)[0])) * 100, 2)) + "%"
+	
+	if (int(list(Y2)[0]) == 0):
+		diff2 = "-.--%"
+	else:
+		diff2 = str(round(((int(list(Y2)[-1]) - int(list(Y2)[0])) / int(list(Y2)[0])) * 100, 2)) + "%"
 
 	data1 = plotly.graph_objs.Scatter(
-			x=list(X),
-			y=list(Y1),
-			name='Inbound Queue',
-			mode= 'lines',
-			fill='tozeroy',
-			line = dict(color='rgb(0, 255, 242)')
+		x=list(X),
+		y=list(Y1),
+		name='Inbound Queue',
+		mode= 'lines',
+		fill='tozeroy',
+		line = dict(color='rgb(0, 255, 242)')
 	)
 	data2 = plotly.graph_objs.Scatter(
-			x=list(X),
-			y=list(Y2),
-			name='French Queue',
-			mode= 'lines',
-			fill='tozeroy',
-			yaxis='y2',
-			line = dict(color='rgb(255, 94, 225)')
+		x=list(X),
+		y=list(Y2),
+		name='French Queue',
+		mode= 'lines',
+		fill='tozeroy',
+		yaxis='y2',
+		line = dict(color='rgb(255, 94, 225)')
 	)
-	
+	line1 = plotly.graph_objs.Scatter(
+		x=[list(X)[0], list(X)[-1]],
+		y=[list(Y1)[0], list(Y1)[-1]],
+		name = "Inbound 1H Diff",
+		line = dict(
+			color = '#ff0101',
+			width = 2,
+			dash = 'dot'
+		),
+		yaxis='y3'
+	)
+	line2 = plotly.graph_objs.Scatter(
+		x=[list(X)[0], list(X)[-1]],
+		y=[list(Y2)[0], list(Y2)[-1]],
+		name = "French 1H Diff",
+		line = dict(
+			color = '#ffff00',
+			width = 2,
+			dash = 'dot'
+		),
+		yaxis='y4'
+	)
+	line3 = plotly.graph_objs.Scatter(
+		x=[min(list(X)), max(list(X))],
+		y=[list(Y1)[list(X).index(min(list(X)))], list(Y1)[list(X).index(max(list(X)))]],
+		name = "Inbound 1H Diff",
+		line = dict(
+			color = '#39ff14',
+			width = 2,
+			dash = 'dot'
+		),
+		yaxis='y3'
+	)
+
 	annotations=[
         dict(
-            x=list(X)[-1],
+			xref='x',
+			yref='y',
+			x=list(X)[-1],
             y=list(Y1)[-1],
-            xref='x',
-            yref='y',
             text=str(list(Y1)[-1]),
             showarrow=False,
 			font=dict(
 				size=40,
 				family='Monaco, monospace',
-                color='rgb(0, 255, 242)'
-            ),
-            ax=30,
-            ay=-10
-        ),
-        dict(
-            x=list(X)[-1],
-            y=list(Y2)[-1],
-            xref='x',
-            yref='y2',
-            text=str(list(Y2)[-1]),
-            showarrow=False,
+				color='rgb(0, 255, 242)'
+			),
+			ax=-1000,
+			ay=-10
+		),
+		dict(
+			xref='x',
+			yref='y2',
+			x=list(X)[-1],
+			y=list(Y2)[-1],
+			text=str(list(Y2)[-1]),
+			showarrow=False,
 			font=dict(
 				size=40,
 				family='Monaco, monospace',
-                color='rgb(255, 94, 225)'
-            ),
-            ax=30,
-            ay=-10
-        )
-    ]
+				color='rgb(255, 94, 225)'
+			),
+			ax=-1000,
+			ay=-10
+		)
+	]
 	
 	fig = tools.make_subplots(
 		rows=2,
@@ -157,7 +200,10 @@ def update_graph_scatter():
 	)
 	
 	fig.append_trace(data1, 1, 1)
+	fig.append_trace(line1, 1, 1)
 	fig.append_trace(data2, 2, 1)
+	fig.append_trace(line2, 2, 1)
+	fig.append_trace(line3, 1, 1)
 	
 	fig['layout'].update(
 		annotations=annotations,
@@ -175,7 +221,7 @@ def update_graph_scatter():
 			linecolor='black',
 			linewidth=2,
 			tickwidth=2,
-			showticklabels=False
+			showticklabels=False,
 		),
 		xaxis2=dict(
 			color='lightgrey',
@@ -186,14 +232,14 @@ def update_graph_scatter():
 			range=[min(X), max(X)],
 			linecolor='black',
 			linewidth=2,
-			tickwidth=2
+			tickwidth=2,
 		),
 		yaxis=dict(
 			color='rgb(0, 226, 215)',
 			tickcolor='black',
 			gridcolor='rgb(112, 112, 112)',
 			ticks='outside',
-			title='INBOUND',
+			title='INBOUND (' + diff + ')',
 			titlefont=dict(
 				family='Lucida Sans Unicode", "Lucida Grande", sans-serif',
 				color='rgb(0, 226, 215)',
@@ -203,14 +249,15 @@ def update_graph_scatter():
 			linecolor='black',
 			linewidth=2,
 			mirror='ticks',
-			tickwidth=2
+			tickwidth=2,
+			side='left'
 		),
 		yaxis2=dict(
 			color='rgb(255, 94, 225)',
 			tickcolor='black',
 			gridcolor='rgb(112, 112, 112)',
 			ticks='outside',
-			title='FRENCH',
+			title='FRENCH (' + diff2 + ')',
 			titlefont=dict(
 				family='Lucida Sans Unicode", "Lucida Grande", sans-serif',
 				color='rgb(255, 94, 225)',
@@ -220,7 +267,8 @@ def update_graph_scatter():
 			linecolor='black',
 			linewidth=2,
 			mirror='ticks',
-			tickwidth=2
+			tickwidth=2,
+			side='left'
 		)
 	)
 	

@@ -2,7 +2,6 @@
 ### The Queue Project
 Every day at GoDaddy, hundreds of customers are calling in to resolve issues on their site, to request certain features, or even to ask for some advice on their business. Throughout the day, the queue goes up and down in numbers but there is no tool to graph the historical levels throughout the day. <b>The Queue Project</b> is a web application that I built in Python that scrapes data from our queues every 4 seconds and then graphs the results live within your browser. Additionally, at the end of each day, a daily report is automatically generated.
 
-Here is a demonstration of the live graph in action:
 ![Live Queue Graph](https://github.com/jdhouti/Metrique/blob/master/images/demo.png)
 
 ---
