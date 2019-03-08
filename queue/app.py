@@ -17,6 +17,8 @@ Y2.append(scrape()[1])
 X = deque(maxlen=900)
 X.append(datetime.datetime.now())
 
+y_axis = [Y1, Y2]
+
 app = dash.Dash(__name__)
 app.layout = html.Div([
 		html.Div(
@@ -38,6 +40,42 @@ app.layout = html.Div([
         ),
     ]
 )
+
+# Create annotations
+annotations = []
+for i in y_axis:
+	annotation.append(
+		dict(
+            x=list(X)[-1],
+            y=list(i)[-1],
+            xref='x',
+            yref='y',	# this is the problem right here
+            text=str(list(i)[-1]),
+            showarrow=False,
+			font=dict(
+				size=40,
+				family='Monaco, monospace',
+                color='rgb(0, 255, 242)'
+            ),
+            ax=30,
+            ay=-10
+        ),
+        dict(
+            x=list(X)[-1],
+            y=list(Y2)[-1],
+            xref='x',
+            yref='y2',
+            text=str(list(Y2)[-1]),
+            showarrow=False,
+			font=dict(
+				size=40,
+				family='Monaco, monospace',
+                color='rgb(255, 94, 225)'
+            ),
+            ax=30,
+            ay=-10
+        )
+    )
 
 @app.callback(Output('live-update-text', 'children'),
               events=[Event('interval-component', 'interval')])

@@ -12,7 +12,7 @@ print('info : current time is ' + str(datetime.datetime.now()))
 print('info : file name is ' + data_filename)
 
 while datetime.datetime.time(datetime.datetime.now()) < time_limit:
-    try:
+    try:f
         page = urllib.request.urlopen(url)
     except urllib.error.URLError:
         print('error: url could not be reached')
