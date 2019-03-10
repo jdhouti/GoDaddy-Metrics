@@ -3,3 +3,5 @@ clean_data.csv
 data_cleaning.ipynb
 data.csv
 .vscode
+.idea
+.DS_Store
