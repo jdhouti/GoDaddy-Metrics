@@ -10,8 +10,11 @@ data_filename = 'queue_data_' + str(datetime.datetime.now().date()) + '.csv'
 print('info : generating report for ' + data_filename)
 
 try:
+	print("info : converting data to data frame")
 	df = pd.read_csv(data_filename)
+	print("info : creating columns")
 	df.columns = ['Inbound', 'Agents', 'French', 'time']
+	print("info : converting the dataframe column to datetime type")
 	df['time'] = pd.to_datetime(df['time'])
 except:
 	print('error: could not generate report :(')

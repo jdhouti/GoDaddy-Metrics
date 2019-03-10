@@ -17,8 +17,6 @@ Y2.append(scrape()[1])
 X = deque(maxlen=1800)
 X.append(datetime.datetime.now())
 
-y_axis = [Y1, Y2]
-
 app = dash.Dash(__name__)
 app.layout = html.Div([
 		html.Div(
@@ -40,42 +38,6 @@ app.layout = html.Div([
         ),
     ]
 )
-
-# Create annotations
-annotations = []
-for i in y_axis:
-	annotation.append(
-		dict(
-            x=list(X)[-1],
-            y=list(i)[-1],
-            xref='x',
-            yref='y',	# this is the problem right here
-            text=str(list(i)[-1]),
-            showarrow=False,
-			font=dict(
-				size=40,
-				family='Monaco, monospace',
-                color='rgb(0, 255, 242)'
-            ),
-            ax=30,
-            ay=-10
-        ),
-        dict(
-            x=list(X)[-1],
-            y=list(Y2)[-1],
-            xref='x',
-            yref='y2',
-            text=str(list(Y2)[-1]),
-            showarrow=False,
-			font=dict(
-				size=40,
-				family='Monaco, monospace',
-                color='rgb(255, 94, 225)'
-            ),
-            ax=30,
-            ay=-10
-        )
-    )
 
 @app.callback(Output('live-update-text', 'children'),
               events=[Event('interval-component', 'interval')])
@@ -105,6 +67,9 @@ def update_graph_scatter():
 	else:
 		diff2 = str(round(((int(list(Y2)[-1]) - int(list(Y2)[0])) / int(list(Y2)[0])) * 100, 2)) + "%"
 
+	# ============================================
+	# graph elements for the regular inbound queue
+	# ============================================
 	data1 = plotly.graph_objs.Scatter(
 		x=list(X),
 		y=list(Y1),
@@ -112,15 +77,6 @@ def update_graph_scatter():
 		mode= 'lines',
 		fill='tozeroy',
 		line = dict(color='rgb(0, 255, 242)')
-	)
-	data2 = plotly.graph_objs.Scatter(
-		x=list(X),
-		y=list(Y2),
-		name='French Queue',
-		mode= 'lines',
-		fill='tozeroy',
-		yaxis='y2',
-		line = dict(color='rgb(255, 94, 225)')
 	)
 	line1 = plotly.graph_objs.Scatter(
 		x=[list(X)[0], list(X)[-1]],
@@ -133,6 +89,18 @@ def update_graph_scatter():
 		),
 		yaxis='y3'
 	)
+	# ============================================
+	# graph elements for the regular french queue
+	# ============================================
+	data2 = plotly.graph_objs.Scatter(
+		x=list(X),
+		y=list(Y2),
+		name='French Queue',
+		mode= 'lines',
+		fill='tozeroy',
+		yaxis='y2',
+		line = dict(color='rgb(255, 94, 225)')
+	)
 	line2 = plotly.graph_objs.Scatter(
 		x=[list(X)[0], list(X)[-1]],
 		y=[list(Y2)[0], list(Y2)[-1]],
@@ -143,17 +111,6 @@ def update_graph_scatter():
 			dash = 'dot'
 		),
 		yaxis='y4'
-	)
-	line3 = plotly.graph_objs.Scatter(
-		x=[min(list(X)), max(list(X))],
-		y=[list(Y1)[list(X).index(min(list(X)))], list(Y1)[list(X).index(max(list(X)))]],
-		name = "Inbound 1H Diff",
-		line = dict(
-			color = '#39ff14',
-			width = 2,
-			dash = 'dot'
-		),
-		yaxis='y3'
 	)
 
 	annotations=[
@@ -199,12 +156,14 @@ def update_graph_scatter():
 		)
 	)
 	
+	# add the the new plots to the figure
 	fig.append_trace(data1, 1, 1)
 	fig.append_trace(line1, 1, 1)
 	fig.append_trace(data2, 2, 1)
 	fig.append_trace(line2, 2, 1)
 	fig.append_trace(line3, 1, 1)
 	
+	# design of the live graph
 	fig['layout'].update(
 		annotations=annotations,
 		paper_bgcolor='rgb(61, 61, 61)',
